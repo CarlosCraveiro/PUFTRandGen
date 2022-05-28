@@ -1,12 +1,19 @@
-module ringOsc(w6, enable);
-    input enable;
-    output w6;
-    wire w1, w2, w3, w4, w5;
+module xorIvRO
+#(parameter N=2)
+    ( output f,
+      input enable  );
 
-    and (w1, enable, w6);
-    not #2(w2, w1);
-    xor (w3, w2, enable);
-    not #3(w4, w3);
-    xor (w5, w4, enable);
-    not #1(w6, w5);
+    wire w[(2*N - 1):0];
+
+    and (w[0], enable, f);
+    
+    genvar i;
+    generate
+      for (i = 1; i < N; i = i + 1) begin
+        xor (w[2*i - 1], w[2*i - 2], enable);
+        not #(i) (w[2*i], w[2*i - 1]);
+      end
+      xor (w[2*N - 1], w[2*N - 2], enable);
+      not (f, w[2*N - 1]);
+    endgenerate
 endmodule
